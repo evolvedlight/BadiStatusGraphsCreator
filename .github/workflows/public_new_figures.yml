@@ -21,3 +21,5 @@ jobs:
         dotnet-version: 3.1.301
     - name: Run it
       run: dotnet run
+      env: 
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
