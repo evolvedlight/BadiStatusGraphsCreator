@@ -30,12 +30,14 @@ namespace BadiStatusGraphsCreator
 
             var existingBadis = JsonSerializer.Deserialize<List<BadiInfo>>(existingFile.Single().Content);
             var commitStrings = new List<String>();
+            var changedBadis = new List<String>();
             foreach (var existingBadi in existingBadis)
             {
                 var newBadi = results.Single(x => x.Name == existingBadi.Name);
                 if (newBadi.LastUpdate != existingBadi.LastUpdate)
                 {
-                    commitStrings.Add($"Badi {newBadi.Name} changed status at {newBadi.LastUpdate} from {existingBadi.Status} to {newBadi.Status}");
+                    commitStrings.Add($"- {newBadi.Name} changed status at {newBadi.LastUpdate} from {existingBadi.Status} to {newBadi.Status}");
+                    changedBadis.Add(existingBadi.Name);
                 }
             }
 
@@ -46,7 +48,7 @@ namespace BadiStatusGraphsCreator
                     Console.WriteLine(commitString);
                 }
 
-                var upReq = new UpdateFileRequest(string.Join(Environment.NewLine, commitStrings), jsonContent, existingFile.First().Sha, "main");
+                var upReq = new UpdateFileRequest($"{string.Join(", ", changedBadis)} changed: \n\n{string.Join(Environment.NewLine, commitStrings)}", jsonContent, existingFile.First().Sha, "main");
 
                 var res = await github.Repository.Content.UpdateFile("evolvedlight", "ZhBadiStatus", "latest.json", upReq);
 
