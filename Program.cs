@@ -1,6 +1,8 @@
 ﻿using Octokit;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using YetAnotherConsoleTables;
@@ -25,10 +27,35 @@ namespace BadiStatusGraphsCreator
 
             var existingFile = await github.Repository.Content.GetAllContents("evolvedlight", "ZhBadiStatus", "latest.json");
 
-            var upReq = new UpdateFileRequest("Update Badi Statuses", jsonContent, existingFile.First().Sha, "main");
 
-            var res = await github.Repository.Content.UpdateFile("evolvedlight", "ZhBadiStatus", "latest.json", upReq);
-            Console.WriteLine(res.Commit.Sha);
+            var existingBadis = JsonSerializer.Deserialize<List<BadiInfo>>(existingFile.Single().Content);
+            var commitStrings = new List<String>();
+            foreach (var existingBadi in existingBadis)
+            {
+                var newBadi = results.Single(x => x.Name == existingBadi.Name);
+                if (newBadi.LastUpdate != existingBadi.LastUpdate)
+                {
+                    commitStrings.Add($"Badi {newBadi.Name} changed status at {newBadi.LastUpdate} from {existingBadi.Status} to {newBadi.Status}");
+                }
+            }
+
+            if (commitStrings.Any())
+            {
+                foreach (var commitString in commitStrings)
+                {
+                    Console.WriteLine(commitString);
+                }
+
+                var upReq = new UpdateFileRequest(string.Join(Environment.NewLine, commitStrings), jsonContent, existingFile.First().Sha, "main");
+
+                var res = await github.Repository.Content.UpdateFile("evolvedlight", "ZhBadiStatus", "latest.json", upReq);
+
+                Console.WriteLine($"Updated Badis: {res.Commit.Sha}");
+            }
+            else
+            {
+                Console.WriteLine($"No change for badis, no commit");
+            }
         }
     }
 }
