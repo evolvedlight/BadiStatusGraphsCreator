@@ -27,7 +27,7 @@ namespace BadiStatusGraphsCreator
                 badi.Name = fields[headers.IndexOf("Badeanlage")];
                 badi.Status = fields[headers.IndexOf("Status")];
                 badi.Temperature = int.Parse(fields[headers.IndexOf("Wasser")].Substring(0, 2));
-                badi.LastUpdate = DateTime.ParseExact(fields[headers.IndexOf("aktualisiert")], "dddd dd. MMMM yyyy HH.mm", new CultureInfo("de-DE"));
+                badi.LastUpdate = DateTime.ParseExact(fields[headers.IndexOf("aktualisiert")], "dddd d. MMMM yyyy HH.mm", new CultureInfo("de-DE"));
                 results.Add(badi);
             }
 
